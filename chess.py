@@ -372,25 +372,30 @@ class Board:
             return f'{colour_sym}{piece_sym}'
 
         # Row 7 is at the top, so print in reverse order
-        print(' ' * 4, end='')
-        print('  '.join([f'{i:2}' for i in range(8)]), end='\n\n')
+        row_ =[]
+        row_.append(' ' * 4)
+        row_.append('  '.join([f'{i:2}' for i in range(8)]))
         for row in range(7, -1, -1):
-            print(f'{row:2}  ', end='')
+            row_l = []
+            row_l.append((f'{row:2}  '))
             for col in range(8):
                 coord = (col, row)  # tuple
                 if coord in self.coords():
                     piece = self.get_piece(coord)
-                    print(f'{sym(piece)}', end='')
+                    row_l.append(f'{sym(piece)}')
                 else:
                     piece = None
-                    print('  ', end='')
+                    row_l.append('  ')
                 if col == 7:     # Put line break at the end
-                    print('')
+                    row_l.append('')
                 else:            # Print two spaces between pieces
-                    print('  ', end='')
-            print(' '*15)
+                    row_l.append('  ')
+            row_l.append(' '*15)
+            whole = [row_]
+            whole.append(row_l)
             if self.checkmate is not None:
                 print(f'{self.checkmate} is checkmated!')
+            return whole
 
     def prompt(self):
         if self.debug:
