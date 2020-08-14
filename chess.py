@@ -395,7 +395,7 @@ class Board:
             whole.append(row_l)
             if self.checkmate is not None:
                 print(f'{self.checkmate} is checkmated!')
-            return whole
+        return whole
 
     def prompt(self):
         if self.debug:
