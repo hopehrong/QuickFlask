@@ -375,6 +375,7 @@ class Board:
         row_ =[]
         row_.append(' ' * 4)
         row_.append('  '.join([f'{i:2}' for i in range(8)]))
+        whole = [row_]
         for row in range(7, -1, -1):
             row_l = []
             row_l.append((f'{row:2}  '))
@@ -390,8 +391,7 @@ class Board:
                     row_l.append('')
                 else:            # Print two spaces between pieces
                     row_l.append('  ')
-            row_l.append(' '*15)
-            whole = [row_]
+
             whole.append(row_l)
             if self.checkmate is not None:
                 print(f'{self.checkmate} is checkmated!')
