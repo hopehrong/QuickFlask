@@ -53,6 +53,8 @@ def play():
 
     
 
+    
+
 @app.route('/promote')
 def promote():
     ui.board = game.display()
