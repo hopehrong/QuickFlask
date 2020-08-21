@@ -407,60 +407,40 @@ class Board:
                 print(f'{self.checkmate} is checkmated!')
         return whole
 
-    def prompt(self):
-        if self.debug:
-            print('== PROMPT ==')
-        def valid_format(inputstr):
-            return len(inputstr) == 5 and inputstr[2] == ' ' \
-                and inputstr[0:1].isdigit() \
-                and inputstr[3:4].isdigit()
 
-        def valid_num(inputstr):
-            for char in (inputstr[0:1] + inputstr[3:4]):
-                if char not in '01234567':
-                    return False
-            return True
+    def valid_format(self,inputstr):
+        return len(inputstr) == 5 and inputstr[2] == ' ' \
+            and inputstr[0:1].isdigit() \
+            and inputstr[3:4].isdigit()
 
-        def split_and_convert(inputstr):
-            '''Convert 5-char inputstr into start and end tuples.'''
-            start, end = inputstr.split(' ')
-            start = (int(start[0]), int(start[1]))
-            end = (int(end[0]), int(end[1]))
-            return (start, end)
+    def valid_num(self,inputstr):
+        for char in (inputstr[0:1] + inputstr[3:4]):
+            if char not in '01234567':
+                return False
+        return True
 
-        while True:
-            inputstr = input(f'{self.turn.title()} player: ')
-            if not valid_format(inputstr):
-                print('Invalid move. Please enter your move in the '
-                      'following format: __ __, _ represents a digit.')
-            elif not valid_num(inputstr):
-                print('Invalid move. Move digits should be 0-7.')
-            else:
-                start, end = split_and_convert(inputstr)
-                if self.movetype(start, end) is None:
-                    print('Invalid move. Please make a valid move.')
-                else:
-                    return start, end
+    def split_and_convert(self,inputstr):
+        '''Convert 5-char inputstr into start and end tuples.'''
+        start, end = inputstr.split(' ')
+        start = (int(start[0]), int(start[1]))
+        end = (int(end[0]), int(end[1]))            
+        return (start, end)
+
+
 
     def update(self, start, end):
         '''
         Update board according to requested move.
         If an opponent piece is at end, capture it.
         '''
-        if self.debug:
-            print('== UPDATE ==')
         movetype = self.movetype(start, end)
-        if movetype is None:
-            raise MoveError(f'Invalid move ({self.printmove(start, end)})')
-        elif movetype == 'castling':
-            self.printmove(start, end, castling=True)
+        
+        if movetype == 'castling':
             self.castle(start, end)
         elif movetype == 'capture':
-            self.printmove(start, end, capture=True)
             self.remove(end)
             self.move(start, end)
         elif movetype == 'move':
-            self.printmove(start, end)
             self.move(start, end)
         else:
             raise MoveError('Unknown error, please report '
