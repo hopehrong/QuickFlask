@@ -1,5 +1,5 @@
 from flask import Flask
-from flask import render_template, redirect
+from flask import render_template, redirect, request
 from chess import WebInterface, Board
 
 app = Flask(__name__)
@@ -32,10 +32,14 @@ def play():
     # If move is valid, check for pawns to promote
     # Redirect to /promote if there are pawns to promote, otherwise 
     if game.promotepawns():
+        ui.inputlabel = 'promotedpiece'
+        ui.btnlabel = 'Promote'
         return redirect('/promote')
 
 @app.route('/promote')
 def promote():
-    pass
+    print(ui.board)
+    return render_template('chess.html', ui=ui)
+    target = request.args['promotedpieces']
 
 app.run('0.0.0.0')
