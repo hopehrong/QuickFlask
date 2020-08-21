@@ -230,11 +230,15 @@ class Board:
             for opprow, colour in zip([0, 7], ['black', 'white']):
                 if row == opprow and piece.name == 'pawn' \
                         and piece.colour == colour:
+                    return True
+                    
+                    '''                    
                     if PieceClass is None:
                         PieceClass = self.promoteprompt()
                     promoted_piece = PieceClass(colour)
                     self.remove(coord)
                     self.add(coord, promoted_piece)
+                    '''
 
     def king_and_rook_unmoved(self, colour, rook_coord):
         row = rook_coord[1]
