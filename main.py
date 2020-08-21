@@ -32,7 +32,7 @@ def play():
     # If move is valid, check for pawns to promote
     # Redirect to /promote if there are pawns to promote, otherwise 
     if game.promotepawns():
-    return redirect('/promote')
+        return redirect('/promote')
 
 @app.route('/promote')
 def promote():
