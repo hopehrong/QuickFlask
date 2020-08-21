@@ -40,6 +40,7 @@ class BasePiece:
 
 class King(BasePiece):
     name = 'king'
+    symbol = {'white': '♔', 'black': '♚'}
     def __repr__(self):
         return f'King({repr(self.colour)})'
     
@@ -51,6 +52,7 @@ class King(BasePiece):
 
 class Queen(BasePiece):
     name = 'queen'
+    symbol = {'white': '♕', 'black': '♛'}
     def __repr__(self):
         return f'Queen({repr(self.colour)})'
 
@@ -66,6 +68,7 @@ class Queen(BasePiece):
 
 class Bishop(BasePiece):
     name = 'bishop'
+    symbol = {'white': '♗', 'black': '♝'}
     def __repr__(self):
         return f'Bishop({repr(self.colour)})'
 
@@ -79,6 +82,7 @@ class Bishop(BasePiece):
 
 class Knight(BasePiece):
     name = 'knight'
+    symbol = {'white': '♘', 'black': '♞'}
     def __repr__(self):
         return f'Knight({repr(self.colour)})'
 
@@ -92,6 +96,7 @@ class Knight(BasePiece):
 
 class Rook(BasePiece):
     name = 'rook'
+    symbol = {'white': '♖', 'black': '♜'}
     def __repr__(self):
         return f'Rook({repr(self.colour)})'
 
@@ -118,6 +123,7 @@ class Rook(BasePiece):
 
 class Pawn(BasePiece):
     name = 'pawn'
+    symbol = {'white': '♙', 'black': '♟︎'}
     def __repr__(self):
         return f'Pawn({repr(self.colour)})'
 
@@ -367,9 +373,7 @@ class Board:
             print('== DEBUG MODE ON ==')
         # helper function to generate symbols for piece
         def sym(piece):
-            colour_sym = piece.colour[0].upper()
-            piece_sym = piece.name[0].upper()
-            return f'{colour_sym}{piece_sym}'
+            return piece.symbol[piece.colour]
 
         # Row 7 is at the top, so print in reverse order
         row_ =[]
