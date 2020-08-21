@@ -356,7 +356,7 @@ class Board:
         for piece in self.pieces():
             piece.notmoved = True
 
-        def display(self):
+    def display(self):
         '''
         Displays the contents of the board.
         Each piece is represented by two letters.
