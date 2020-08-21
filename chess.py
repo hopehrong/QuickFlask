@@ -429,20 +429,14 @@ class Board:
         Update board according to requested move.
         If an opponent piece is at end, capture it.
         '''
-        if self.debug:
-            print('== UPDATE ==')
         movetype = self.movetype(start, end)
-        if movetype is None:
-            raise MoveError(f'Invalid move ({self.printmove(start, end)})')
-        elif movetype == 'castling':
-            self.printmove(start, end, castling=True)
+        
+        if movetype == 'castling':
             self.castle(start, end)
         elif movetype == 'capture':
-            self.printmove(start, end, capture=True)
             self.remove(end)
             self.move(start, end)
         elif movetype == 'move':
-            self.printmove(start, end)
             self.move(start, end)
         else:
             raise MoveError('Unknown error, please report '

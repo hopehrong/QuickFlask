@@ -34,22 +34,22 @@ def play():
     elif not game.valid_format(move):
         ui.errmsg = 'Invalid move. Please enter your move in the following format: __ __, _ represents a digit.'
         return render_template('chess.html', ui=ui)
+    elif not game.valid_num(move):
+        ui.errmsg = 'Invalid move. Move digits should be 0-7.'
+        return render_template('chess.html', ui=ui)
+    else:
+        start, end = game.split_and_convert(move)
+        movetype = game.movetype(start, end)
+        if movetype is None:
+            ui.errmsg = 'Invalid move. Please make a valid move.'
+            return render_template('chess.html', ui=ui)
+        else:
+            game.update(start,end)
+
     # If move is valid, check for pawns to promote
     # Redirect to /promote if there are pawns to promote, otherwise 
 
-        # while True:
-        #     inputstr = input(f'{self.turn.title()} player: ')
-        #     if not valid_format(inputstr):
-        #         print('Invalid move. Please enter your move in the '
-        #               'following format: __ __, _ represents a digit.')
-        #     elif not valid_num(inputstr):
-        #         print('Invalid move. Move digits should be 0-7.')
-        #     else:
-        #         start, end = split_and_convert(inputstr)
-        #         if self.movetype(start, end) is None:
-        #             print('Invalid move. Please make a valid move.')
-        #         else:
-        #             return start, end
+    
 
 @app.route('/promote')
 def promote():
