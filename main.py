@@ -26,7 +26,6 @@ def newgame():
 def play():
     # TODO: get player move from GET request object
     # TODO: if there is no player move, render the page template
-    print(ui.board)
     return render_template('chess.html', ui=ui)
     # TODO: Validate move, redirect player back to /play again if move is invalid
     # If move is valid, check for pawns to promote
@@ -38,8 +37,9 @@ def play():
 
 @app.route('/promote')
 def promote():
-    print(ui.board)
+    ui.board = game.display()
+    ui.inputlabel = 'promote pawns to:'
+    ui.btnlabel = 'PROMOTE'
     return render_template('chess.html', ui=ui)
-    target = request.args['promotedpieces']
 
 app.run('0.0.0.0')
