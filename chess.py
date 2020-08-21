@@ -374,7 +374,9 @@ class Board:
         # Row 7 is at the top, so print in reverse order
         row_ =[]
         row_.append(' ' * 4)
-        row_.append('  '.join([f'{i:2}' for i in range(8)]))
+        for x in range(8):
+            row_.append(x)
+            row_.append('  ')
         whole = [row_]
         for row in range(7, -1, -1):
             row_l = []
