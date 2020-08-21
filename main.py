@@ -49,8 +49,6 @@ def play():
     # If move is valid, check for pawns to promote
     # Redirect to /promote if there are pawns to promote, otherwise 
     if game.promotepawns():
-        ui.inputlabel = 'promotedpiece'
-        ui.btnlabel = 'Promote'
         return redirect('/promote')
 
     
