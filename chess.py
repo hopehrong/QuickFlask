@@ -231,6 +231,7 @@ class Board:
                 if row == opprow and piece.name == 'pawn' \
                         and piece.colour == colour:
                     return True, coord
+                else: return False, None
                     
     def promotion(self,coord,PieceClass=None):             
         if PieceClass is None:
@@ -444,7 +445,6 @@ class Board:
         else:
             raise MoveError('Unknown error, please report '
                              f'(movetype={repr(movetype)}).')
-        self.promotepawns()
         if not self.alive('white', 'king'):
             self.winner = 'black'
         elif not self.alive('black', 'king'):
