@@ -54,7 +54,7 @@ def play():
         return redirect('/end')
     else:
         game.next_turn()
-        ui.update('/play')
+        ui.update()
         return render_template('chess.html', ui=ui)
 
 @app.route('/promote')
@@ -74,6 +74,12 @@ def promote():
 @app.route('/end')
 def end():    
     return render_template('chess.html', ui=ui)
+
+@app.route('/undo')
+def undo():
+    game.undo()
+    ui.update()
+    return redirect('/play')
 
 
 app.run('0.0.0.0')

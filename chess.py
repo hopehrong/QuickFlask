@@ -9,27 +9,38 @@ class WebInterface:
         self.showerrmsg = 'display:block'
         self.showinput = 'display:block'
         self.showend = 'display:none'
+        self.showundo = 'display:none'
         self.endmsg = None
     
     def update(self,page = None):
-        
-        if page == '/play':
-            self.inputlabel = f'{self.game.turn} player: '
-            self.btnlabel = 'Move'
-            self.page = page
-        elif page == '/promote':
-            self.inputlabel = 'promote pawns to:'
-            self.btnlabel = 'PROMOTE'
+        if page != None:
             self.page = page
 
-        elif page == '/end':
-            self.showinput = 'display:none'
-            self.showend = 'display:block'
-            self.update_err()
-            self.endmsg = f'Game Over. The winner is {self.game.winner}'
-        
+        self.showinput = 'display:block'
+        self.showend = 'display:none'
+        if self.game.canundo():
+            self.showundo = 'display:block'
+        else:
+            self.showundo = 'display:none'
+
         self.board = self.game.display()
         self.update_err()
+
+        if self.page == '/play':
+            self.inputlabel = f'{self.game.turn} player: '
+            self.btnlabel = 'Move'
+            
+        elif self.page == '/promote':
+            self.inputlabel = 'promote pawns to:'
+            self.btnlabel = 'PROMOTE'
+
+        elif self.page == '/end':
+            self.showinput = 'display:none'
+            self.showend = 'display:block'
+            self.showundo = 'display:none'
+            self.endmsg = f'Game Over. The winner is {self.game.winner}'
+        
+
 
     def update_err(self,errmsg = None):
         self.errmsg = errmsg
@@ -38,6 +49,43 @@ class WebInterface:
         else:
             self.showerrmsg = 'display:block'
 
+class MoveHistory:
+    '''MoveHistory works like a CircularStack'''
+    def __init__(self, size):
+        # Remember to validate input
+        self.size = size
+        self.__data = [None] * size
+        self.head = 0
+
+    def __str__(self):
+        output = []
+        for i in range(self.head,0,-1):
+            output.append(self.__data[i])
+        return str(output)
+    
+    def push(self, move):
+        self.head = (self.head + 1) % self.size
+        self.__data[self.head] = move
+            
+    def pop(self):
+        # Remember to check if MoveHistory is empty
+        move = self.__data[self.head]
+        self.__data[self.head] = None
+        if self.head == 0:
+            self.head = self.size - 1
+        else:
+            self.head -= 1
+        return move
+
+
+class Move:
+    def __init__(self,game,start,end):
+        self.start=start
+        self.end=end
+        self.startpiece = game.get_piece(start)
+        self.endpiece = game.get_piece(end)
+    def __repr__(self):
+        return f'Start:{self.start},{self.startpiece}  End:{self.end},{self.endpiece}'
 
 
 class MoveError(Exception):
@@ -209,11 +257,6 @@ class Board:
         self.debug = kwargs.get('debug', False)
         self.promotiontest = kwargs.get('promotiontest', False)
         self.endtest = kwargs.get('endtest', False)
-        self._position = {}
-        self.winner = None
-        self.checkmate = None
-        self.coord_for_promotion = None
-        self.promotioncolour = None
     
     def coords(self):
         return list(self._position.keys())
@@ -231,7 +274,9 @@ class Board:
         self.get_piece(end).notmoved = False
 
     def remove(self, pos):
-        del self._position[pos]
+        piece = self.get_piece(pos)
+        if piece != None:
+            del self._position[pos]
 
     def castle(self, start, end):
         '''Carry out castling move (assuming move is validated)'''
@@ -374,6 +419,8 @@ class Board:
             print('')
 
     def start(self):
+        self._position = {}
+
         colour = 'black'
         self.add((0, 7), Rook(colour))
         self.add((1, 7), Knight(colour))
@@ -411,6 +458,12 @@ class Board:
 
         for piece in self.pieces():
             piece.notmoved = True
+        
+        self.history = MoveHistory(100)
+        self.winner = None
+        self.checkmate = None
+        self.coord_for_promotion = None
+        self.promotioncolour = None
 
     def display(self):
         '''
@@ -479,6 +532,9 @@ class Board:
         Update board according to requested move.
         If an opponent piece is at end, capture it.
         '''
+        move = Move(self,start,end)
+        self.history.push(move)
+
         movetype = self.movetype(start, end)
         
         if movetype == 'castling':
@@ -495,6 +551,28 @@ class Board:
             self.winner = 'black'
         elif not self.alive('black', 'king'):
             self.winner = 'white'
+
+
+    def undo(self):
+        move = self.history.pop()
+        if move == None:
+            return
+        else:
+            self.remove(move.start)
+            self.remove(move.end)
+            self.add(move.start,move.startpiece)
+            if move.endpiece != None:
+                self.add(move.end,move.endpiece)
+            self.next_turn()
+
+    def canundo(self):
+        move = self.history.pop()
+        if move == None:
+            return False
+        else:
+            self.history.push(move)
+            return True
+
 
     def next_turn(self):
         if self.debug:
