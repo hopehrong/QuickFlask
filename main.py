@@ -48,7 +48,8 @@ def play():
 
     # If move is valid, check for pawns to promote
     # Redirect to /promote if there are pawns to promote, otherwise 
-    if game.promotepawns():
+    check, coord = game.checkpromotion()
+    if check:    
         return redirect('/promote')
 
     
@@ -60,6 +61,15 @@ def promote():
     ui.board = game.display()
     ui.inputlabel = 'promote pawns to:'
     ui.btnlabel = 'PROMOTE'
+    ui.errmsg = ' '
     return render_template('chess.html', ui=ui)
+    choice = request.args.get('moves','')
+    if choice not in 'rbqk':
+        ui.errmsg = 'Invalid input, the input should be one of rbqk'
+        return render_template('chess.html', ui=ui)
+    else:
+        game.promotion(coord)
+        return render_template('chess.html')
+
 
 app.run('0.0.0.0')
