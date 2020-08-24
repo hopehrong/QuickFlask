@@ -68,6 +68,7 @@ def promote():
         return render_template('chess.html', ui=ui)
     else:
         game.promotion()
+        return render_template('chess.html')
 
 
 app.run('0.0.0.0')
