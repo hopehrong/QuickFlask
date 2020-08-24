@@ -8,7 +8,7 @@
     </head>
     <body>
         <!-- Modify this section START -->
-        <table>
+        <table class="center">
         {% for row in ui.board %}
             <tr>
             {% for cell in row %}
@@ -19,12 +19,11 @@
         </table>
 
 
-        <form action="/play" method="get">
-            <label for="moves"> {{ui.inputlabel}}</label>
-            <input type="text" name="moves"><br><br>
-            <input type="submit" value={{ui.btnlabel}}>
+        <form action="/play" method="get" class="form">
+            <label for="moves" class="label"> {{ui.inputlabel}}</label>
+            <input type="text" name="moves" class="label"><br><br>
+            <input type="submit" class="button" value={{ui.btnlabel}}>
         </form>
-        <p>We’ll have some code here to insert error messages, if any. Stay tuned.</p>
         <!-- Modify this section END -->
     </body>
 </html>
