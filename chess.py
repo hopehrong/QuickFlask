@@ -171,11 +171,15 @@ class Board:
     update(start, end)
         Carries out the move (start -> end) and updates the board.
     '''
+    
     def __init__(self, **kwargs):
         self.debug = kwargs.get('debug', False)
         self._position = {}
         self.winner = None
         self.checkmate = None
+        self.ispromotion = False
+        self.coord_for_promotion = None
+        self.promotioncolour = None
     
     def coords(self):
         return list(self._position.keys())
@@ -232,16 +236,21 @@ class Board:
                 print(piece.name)
                 if row == opprow and piece.name == 'pawn' \
                         and piece.colour == colour:
-                    return True, coord
-
-        return False, None
+                    self.ispromotion =True
+                    self.coord_for_promotion = coord
+                    self.promotioncolour = piece.colour
+                    return
+        self.ispromotion = False
+        self.coord_for_promotion = None
+        self.promotioncolour = None
+        return
                     
-    def promotion(self,coord,PieceClass=None):             
+    def promotion(self,choice,PieceClass=None):             
         if PieceClass is None:
-            PieceClass = self.promoteprompt()
-        promoted_piece = PieceClass(colour)
-        self.remove(coord)
-        self.add(coord, promoted_piece)
+            PieceClass = self.promoteprompt(choice)
+        promoted_piece = PieceClass(self.promotioncolour)
+        self.remove(self.coord_for_promotion)
+        self.add(self.coord_for_promotion, promoted_piece)
 
     def king_and_rook_unmoved(self, colour, rook_coord):
         row = rook_coord[1]
@@ -312,14 +321,9 @@ class Board:
                 return None
         return True
 
-    @classmethod
-    def promoteprompt(cls):
-        choice = input(f'Promote pawn to '
-                    '(r=Rook, k=Knight, b=Bishop, '
-                    'q=Queen): ').lower()
-        if choice not in 'rkbq':
-            return cls.promoteprompt()
-        elif choice == 'r':
+
+    def promoteprompt(self,choice):
+        if choice == 'r':
             return Rook
         elif choice == 'k':
             return Knight

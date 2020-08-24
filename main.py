@@ -26,7 +26,18 @@ def newgame():
 def play():
     # TODO: get player move from GET request object
     move = request.args.get('moves','')
-    print(move)
+    if game.ispromotion:
+        if move not in 'rbqk':
+            ui.errmsg = 'Invalid input, the input should be one of rbqk'
+            return redirect('/promote')
+        else:
+            game.promotion(move)
+            ui.board = game.display()
+            ui.errmsg = None
+            ui.inputlabel = f'{game.turn} player: '
+            ui.btnlabel = 'Move'
+            return render_template('chess.html', ui=ui)
+
     # TODO: if there is no player move, render the page template
     if move == '':
         return render_template('chess.html', ui=ui)
@@ -48,8 +59,8 @@ def play():
 
     # If move is valid, check for pawns to promote
     # Redirect to /promote if there are pawns to promote, otherwise 
-    check, coord = game.checkpromotion()
-    if check:    
+    game.checkpromotion()
+    if game.ispromotion:    
         return redirect('/promote')
     else:
         ui.board = game.display()
@@ -66,15 +77,8 @@ def promote():
     ui.board = game.display()
     ui.inputlabel = 'promote pawns to:'
     ui.btnlabel = 'PROMOTE'
-    ui.errmsg = ' '
     return render_template('chess.html', ui=ui)
-    choice = request.args.get('moves','')
-    if choice not in 'rbqk':
-        ui.errmsg = 'Invalid input, the input should be one of rbqk'
-        return render_template('chess.html', ui=ui)
-    else:
-        game.promotion(coord)
-        return render_template('chess.html')
+
 
 
 app.run('0.0.0.0')
