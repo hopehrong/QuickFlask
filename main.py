@@ -34,6 +34,7 @@ def play():
             game.promotion(move)
             ui.board = game.display()
             ui.errmsg = None
+            game.next_turn()
             ui.inputlabel = f'{game.turn} player: '
             ui.btnlabel = 'Move'
             return render_template('chess.html', ui=ui)
