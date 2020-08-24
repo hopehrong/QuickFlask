@@ -230,9 +230,9 @@ class Board:
             for opprow, colour in zip([0, 7], ['black', 'white']):
                 if row == opprow and piece.name == 'pawn' \
                         and piece.colour == colour:
-                    return True
+                    return True, coord
                     
-    def promotion(self,PieceClass=None):             
+    def promotion(self,coord,PieceClass=None):             
         if PieceClass is None:
             PieceClass = self.promoteprompt()
         promoted_piece = PieceClass(colour)
