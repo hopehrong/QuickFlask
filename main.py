@@ -60,6 +60,14 @@ def promote():
     ui.board = game.display()
     ui.inputlabel = 'promote pawns to:'
     ui.btnlabel = 'PROMOTE'
+    ui.errmsg = ' '
     return render_template('chess.html', ui=ui)
+    choice = request.args.get('moves','')
+    if choice not in 'rbqk':
+        ui.errmsg = 'Invalid input, the input should be one of rbqk'
+        return render_template('chess.html', ui=ui)
+    else:
+        game.promotion()
+
 
 app.run('0.0.0.0')

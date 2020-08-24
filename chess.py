@@ -223,7 +223,7 @@ class Board:
                 return True
         return False
     
-    def promotepawns(self, PieceClass=None):
+    def checkpromotion(self):
         for coord in self.coords():
             row = coord[1]
             piece = self.get_piece(coord)
@@ -232,13 +232,12 @@ class Board:
                         and piece.colour == colour:
                     return True
                     
-                    '''                    
-                    if PieceClass is None:
-                        PieceClass = self.promoteprompt()
-                    promoted_piece = PieceClass(colour)
-                    self.remove(coord)
-                    self.add(coord, promoted_piece)
-                    '''
+    def promotion(self,PieceClass=None):             
+        if PieceClass is None:
+            PieceClass = self.promoteprompt()
+        promoted_piece = PieceClass(colour)
+        self.remove(coord)
+        self.add(coord, promoted_piece)
 
     def king_and_rook_unmoved(self, colour, rook_coord):
         row = rook_coord[1]
