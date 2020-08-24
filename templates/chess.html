@@ -19,12 +19,20 @@
         </table>
 
 
-        <form action="/play" method="get">
+        <form action={{ui.page}} method="get" style={{ui.showinput}}>
             <label for="moves"> {{ui.inputlabel}}</label>
             <input type="text" name="moves"><br><br>
             <input type="submit" value={{ui.btnlabel}}>
         </form>
-        <p>{{ui.errmsg}}</p>
+        <p style={{ui.showerrmsg}}>{{ui.errmsg}}</p>
+
+        <p style={{ui.showend}}>
+            {{ui.endmsg}}<br>
+            <a href="/newgame">
+                <button>Start new game</button>
+            </a>
+        </p>
+
         <!-- Modify this section END -->
     </body>
 </html>

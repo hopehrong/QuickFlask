@@ -1,9 +1,42 @@
 class WebInterface:
-    def __init__(self):
+    def __init__(self,game):
         self.inputlabel = None
         self.btnlabel = None
         self.errmsg = None
         self.board = None
+        self.game = game
+        self.page = None
+        self.showerrmsg = 'display:block'
+        self.showinput = 'display:block'
+        self.showend = 'display:none'
+        self.endmsg = None
+    
+    def update(self,page = None):
+        
+        if page == '/play':
+            self.inputlabel = f'{self.game.turn} player: '
+            self.btnlabel = 'Move'
+            self.page = page
+        elif page == '/promote':
+            self.inputlabel = 'promote pawns to:'
+            self.btnlabel = 'PROMOTE'
+            self.page = page
+
+        elif page == '/end':
+            self.showinput = 'display:none'
+            self.showend = 'display:block'
+            self.update_err()
+            self.endmsg = f'Game Over. The winner is {self.game.winner}'
+        
+        self.board = self.game.display()
+        self.update_err()
+
+    def update_err(self,errmsg = None):
+        self.errmsg = errmsg
+        if self.errmsg == None:
+            self.showerrmsg = 'display:none'
+        else:
+            self.showerrmsg = 'display:block'
 
 
 
@@ -174,10 +207,11 @@ class Board:
     
     def __init__(self, **kwargs):
         self.debug = kwargs.get('debug', False)
+        self.promotiontest = kwargs.get('promotiontest', False)
+        self.endtest = kwargs.get('endtest', False)
         self._position = {}
         self.winner = None
         self.checkmate = None
-        self.ispromotion = False
         self.coord_for_promotion = None
         self.promotioncolour = None
     
@@ -232,18 +266,14 @@ class Board:
             row = coord[1]
             piece = self.get_piece(coord)
             for opprow, colour in zip([0, 7], ['black', 'white']):
-                print(row)
-                print(piece.name)
                 if row == opprow and piece.name == 'pawn' \
                         and piece.colour == colour:
-                    self.ispromotion =True
                     self.coord_for_promotion = coord
                     self.promotioncolour = piece.colour
-                    return
-        self.ispromotion = False
+                    return True
         self.coord_for_promotion = None
         self.promotioncolour = None
-        return
+        return False
                     
     def promotion(self,choice,PieceClass=None):             
         if PieceClass is None:
@@ -367,6 +397,15 @@ class Board:
         self.add((7, 0), Rook(colour))
         for x in range(0, 8):
             self.add((x, 1), Pawn(colour))
+
+        if self.promotiontest:
+            self.remove((0,7))
+            self.remove((0,6))
+            self.add((0, 6), Pawn('white'))
+
+        if self.endtest:
+            self.remove((5,6))
+            self.add((7, 4), Queen('white'))
 
         self.turn = 'white'
 
