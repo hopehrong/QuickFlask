@@ -51,7 +51,12 @@ def play():
     check, coord = game.checkpromotion()
     if check:    
         return redirect('/promote')
-
+    else:
+        ui.board = game.display()
+        game.next_turn()
+        ui.inputlabel = f'{game.turn} player: '
+        ui.errmsg = None
+        return render_template('chess.html', ui=ui)
     
 
     

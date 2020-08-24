@@ -228,10 +228,13 @@ class Board:
             row = coord[1]
             piece = self.get_piece(coord)
             for opprow, colour in zip([0, 7], ['black', 'white']):
+                print(row)
+                print(piece.name)
                 if row == opprow and piece.name == 'pawn' \
                         and piece.colour == colour:
                     return True, coord
-                else: return False, None
+
+        return False, None
                     
     def promotion(self,coord,PieceClass=None):             
         if PieceClass is None:
@@ -338,16 +341,16 @@ class Board:
 
     def start(self):
         colour = 'black'
-        self.add((0, 7), Rook(colour))
-        self.add((1, 7), Knight(colour))
-        self.add((2, 7), Bishop(colour))
-        self.add((3, 7), Queen(colour))
-        self.add((4, 7), King(colour))
-        self.add((5, 7), Bishop(colour))
-        self.add((6, 7), Knight(colour))
-        self.add((7, 7), Rook(colour))
-        for x in range(0, 8):
-            self.add((x, 6), Pawn(colour))
+        # self.add((0, 7), Rook(colour))
+        # self.add((1, 7), Knight(colour))
+        # self.add((2, 7), Bishop(colour))
+        # self.add((3, 7), Queen(colour))
+        # self.add((4, 7), King(colour))
+        # self.add((5, 7), Bishop(colour))
+        # self.add((6, 7), Knight(colour))
+        # self.add((7, 7), Rook(colour))
+        # for x in range(0, 8):
+        #     self.add((x, 6), Pawn(colour))
 
         colour = 'white'
         self.add((0, 0), Rook(colour))
@@ -360,7 +363,8 @@ class Board:
         self.add((7, 0), Rook(colour))
         for x in range(0, 8):
             self.add((x, 1), Pawn(colour))
-        
+        self.add((0, 6), Pawn(colour))
+
         self.turn = 'white'
 
         for piece in self.pieces():
