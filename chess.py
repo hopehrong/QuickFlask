@@ -1,10 +1,91 @@
 class WebInterface:
-    def __init__(self):
+    def __init__(self,game):
         self.inputlabel = None
         self.btnlabel = None
         self.errmsg = None
         self.board = None
+        self.game = game
+        self.page = None
+        self.showerrmsg = 'display:block'
+        self.showinput = 'display:block'
+        self.showend = 'display:none'
+        self.showundo = 'display:none'
+        self.endmsg = None
+    
+    def update(self,page = None):
+        if page != None:
+            self.page = page
 
+        self.showinput = 'display:block'
+        self.showend = 'display:none'
+        if self.game.canundo():
+            self.showundo = 'display:block'
+        else:
+            self.showundo = 'display:none'
+
+        self.board = self.game.display()
+        self.update_err()
+
+        if self.page == '/play':
+            self.inputlabel = f'{self.game.turn} player: '
+            self.btnlabel = 'Move'
+            
+        elif self.page == '/promote':
+            self.inputlabel = 'promote pawns to:'
+            self.btnlabel = 'PROMOTE'
+
+        elif self.page == '/end':
+            self.showinput = 'display:none'
+            self.showend = 'display:block'
+            self.showundo = 'display:none'
+            self.endmsg = f'Game Over. The winner is {self.game.winner}'
+        
+
+
+    def update_err(self,errmsg = None):
+        self.errmsg = errmsg
+        if self.errmsg == None:
+            self.showerrmsg = 'display:none'
+        else:
+            self.showerrmsg = 'display:block'
+
+class MoveHistory:
+    '''MoveHistory works like a CircularStack'''
+    def __init__(self, size):
+        # Remember to validate input
+        self.size = size
+        self.__data = [None] * size
+        self.head = 0
+
+    def __str__(self):
+        output = []
+        for i in range(self.head,0,-1):
+            output.append(self.__data[i])
+        return str(output)
+    
+    def push(self, move):
+        self.head = (self.head + 1) % self.size
+        self.__data[self.head] = move
+            
+    def pop(self):
+        # Remember to check if MoveHistory is empty
+        move = self.__data[self.head]
+        self.__data[self.head] = None
+        if self.head == 0:
+            self.head = self.size - 1
+        else:
+            self.head -= 1
+        return move
+
+
+class Move:
+    def __init__(self,game,start,end):
+        self.start=start
+        self.end=end
+        self.startpiece = game.get_piece(start)
+        self.endpiece = game.get_piece(end)
+    def __repr__(self):
+        return f'Start:{self.start},{self.startpiece}  End:{self.end},{self.endpiece}'
 
 
 class MoveError(Exception):
@@ -171,11 +252,11 @@ class Board:
     update(start, end)
         Carries out the move (start -> end) and updates the board.
     '''
+    
     def __init__(self, **kwargs):
         self.debug = kwargs.get('debug', False)
-        self._position = {}
-        self.winner = None
-        self.checkmate = None
+        self.promotiontest = kwargs.get('promotiontest', False)
+        self.endtest = kwargs.get('endtest', False)
     
     def coords(self):
         return list(self._position.keys())
@@ -193,7 +274,9 @@ class Board:
         self.get_piece(end).notmoved = False
 
     def remove(self, pos):
-        del self._position[pos]
+        piece = self.get_piece(pos)
+        if piece != None:
+            del self._position[pos]
 
     def castle(self, start, end):
         '''Carry out castling move (assuming move is validated)'''
@@ -223,22 +306,26 @@ class Board:
                 return True
         return False
     
-    def promotepawns(self, PieceClass=None):
+    def checkpromotion(self):
         for coord in self.coords():
             row = coord[1]
             piece = self.get_piece(coord)
             for opprow, colour in zip([0, 7], ['black', 'white']):
                 if row == opprow and piece.name == 'pawn' \
                         and piece.colour == colour:
+                    self.coord_for_promotion = coord
+                    self.promotioncolour = piece.colour
                     return True
+        self.coord_for_promotion = None
+        self.promotioncolour = None
+        return False
                     
-                    '''                    
-                    if PieceClass is None:
-                        PieceClass = self.promoteprompt()
-                    promoted_piece = PieceClass(colour)
-                    self.remove(coord)
-                    self.add(coord, promoted_piece)
-                    '''
+    def promotion(self,choice,PieceClass=None):             
+        if PieceClass is None:
+            PieceClass = self.promoteprompt(choice)
+        promoted_piece = PieceClass(self.promotioncolour)
+        self.remove(self.coord_for_promotion)
+        self.add(self.coord_for_promotion, promoted_piece)
 
     def king_and_rook_unmoved(self, colour, rook_coord):
         row = rook_coord[1]
@@ -309,14 +396,9 @@ class Board:
                 return None
         return True
 
-    @classmethod
-    def promoteprompt(cls):
-        choice = input(f'Promote pawn to '
-                    '(r=Rook, k=Knight, b=Bishop, '
-                    'q=Queen): ').lower()
-        if choice not in 'rkbq':
-            return cls.promoteprompt()
-        elif choice == 'r':
+
+    def promoteprompt(self,choice):
+        if choice == 'r':
             return Rook
         elif choice == 'k':
             return Knight
@@ -337,6 +419,8 @@ class Board:
             print('')
 
     def start(self):
+        self._position = {}
+
         colour = 'black'
         self.add((0, 7), Rook(colour))
         self.add((1, 7), Knight(colour))
@@ -360,11 +444,26 @@ class Board:
         self.add((7, 0), Rook(colour))
         for x in range(0, 8):
             self.add((x, 1), Pawn(colour))
-        
+
+        if self.promotiontest:
+            self.remove((0,7))
+            self.remove((0,6))
+            self.add((0, 6), Pawn('white'))
+
+        if self.endtest:
+            self.remove((5,6))
+            self.add((7, 4), Queen('white'))
+
         self.turn = 'white'
 
         for piece in self.pieces():
             piece.notmoved = True
+        
+        self.history = MoveHistory(100)
+        self.winner = None
+        self.checkmate = None
+        self.coord_for_promotion = None
+        self.promotioncolour = None
 
     def display(self):
         '''
@@ -407,69 +506,73 @@ class Board:
                 print(f'{self.checkmate} is checkmated!')
         return whole
 
-    def prompt(self):
-        if self.debug:
-            print('== PROMPT ==')
-        def valid_format(inputstr):
-            return len(inputstr) == 5 and inputstr[2] == ' ' \
-                and inputstr[0:1].isdigit() \
-                and inputstr[3:4].isdigit()
 
-        def valid_num(inputstr):
-            for char in (inputstr[0:1] + inputstr[3:4]):
-                if char not in '01234567':
-                    return False
-            return True
+    def valid_format(self,inputstr):
+        return len(inputstr) == 5 and inputstr[2] == ' ' \
+            and inputstr[0:1].isdigit() \
+            and inputstr[3:4].isdigit()
 
-        def split_and_convert(inputstr):
-            '''Convert 5-char inputstr into start and end tuples.'''
-            start, end = inputstr.split(' ')
-            start = (int(start[0]), int(start[1]))
-            end = (int(end[0]), int(end[1]))
-            return (start, end)
+    def valid_num(self,inputstr):
+        for char in (inputstr[0:1] + inputstr[3:4]):
+            if char not in '01234567':
+                return False
+        return True
 
-        while True:
-            inputstr = input(f'{self.turn.title()} player: ')
-            if not valid_format(inputstr):
-                print('Invalid move. Please enter your move in the '
-                      'following format: __ __, _ represents a digit.')
-            elif not valid_num(inputstr):
-                print('Invalid move. Move digits should be 0-7.')
-            else:
-                start, end = split_and_convert(inputstr)
-                if self.movetype(start, end) is None:
-                    print('Invalid move. Please make a valid move.')
-                else:
-                    return start, end
+    def split_and_convert(self,inputstr):
+        '''Convert 5-char inputstr into start and end tuples.'''
+        start, end = inputstr.split(' ')
+        start = (int(start[0]), int(start[1]))
+        end = (int(end[0]), int(end[1]))            
+        return (start, end)
+
+
 
     def update(self, start, end):
         '''
         Update board according to requested move.
         If an opponent piece is at end, capture it.
         '''
-        if self.debug:
-            print('== UPDATE ==')
+        move = Move(self,start,end)
+        self.history.push(move)
+
         movetype = self.movetype(start, end)
-        if movetype is None:
-            raise MoveError(f'Invalid move ({self.printmove(start, end)})')
-        elif movetype == 'castling':
-            self.printmove(start, end, castling=True)
+        
+        if movetype == 'castling':
             self.castle(start, end)
         elif movetype == 'capture':
-            self.printmove(start, end, capture=True)
             self.remove(end)
             self.move(start, end)
         elif movetype == 'move':
-            self.printmove(start, end)
             self.move(start, end)
         else:
             raise MoveError('Unknown error, please report '
                              f'(movetype={repr(movetype)}).')
-        self.promotepawns()
         if not self.alive('white', 'king'):
             self.winner = 'black'
         elif not self.alive('black', 'king'):
             self.winner = 'white'
+
+
+    def undo(self):
+        move = self.history.pop()
+        if move == None:
+            return
+        else:
+            self.remove(move.start)
+            self.remove(move.end)
+            self.add(move.start,move.startpiece)
+            if move.endpiece != None:
+                self.add(move.end,move.endpiece)
+            self.next_turn()
+
+    def canundo(self):
+        move = self.history.pop()
+        if move == None:
+            return False
+        else:
+            self.history.push(move)
+            return True
+
 
     def next_turn(self):
         if self.debug:
