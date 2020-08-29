@@ -8,7 +8,7 @@
     </head>
     <body>
         <!-- Modify this section START -->
-        <table>
+        <table class="center">
         {% for row in ui.board %}
             <tr>
             {% for cell in row %}
@@ -17,7 +17,6 @@
             </tr>
         {% endfor %}
         </table>
-
 
         <form action={{ui.page}} method="get" style={{ui.showinput}}>
             <label for="moves"> {{ui.inputlabel}}</label>
@@ -39,7 +38,6 @@
                 <button>Start new game</button>
             </a>
         </p>
-
         <!-- Modify this section END -->
     </body>
 </html>
