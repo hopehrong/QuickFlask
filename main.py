@@ -44,10 +44,6 @@ def play():
 
     # If move is valid, check for pawns to promote
     # Redirect to /promote if there are pawns to promote, otherwise 
-<<<<<<< HEAD
-    if game.promotepawns():
-        return redirect('/promote')
-=======
     
     if game.checkpromotion():
         ui.update('/promote')    
@@ -60,7 +56,6 @@ def play():
         game.next_turn()
         ui.update()
         return render_template('chess.html', ui=ui)
->>>>>>> master
 
 @app.route('/promote')
 def promote():
