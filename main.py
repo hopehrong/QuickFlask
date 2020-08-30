@@ -3,7 +3,7 @@ from flask import render_template, redirect, request
 from chess import WebInterface, Board
 
 app = Flask(__name__)
-game = Board(endtest=True)
+game = Board()
 ui = WebInterface(game)
 
 @app.route('/')
